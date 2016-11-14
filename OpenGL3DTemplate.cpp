@@ -80,13 +80,6 @@ void key(unsigned char k, int x, int y)
 	glutPostRedisplay();
 }
 
-void drawWall(double thickness) {
-	glPushMatrix();
-	glScaled(1.0, 0.1 * thickness, 1.0);
-	glutSolidCube(10);
-	glPopMatrix();
-}
-
 void drawBullet(){
 	glutSolidTorus(0.05, 0.29, 100, 100);
 	glutSolidTorus(0.05, 0.14, 100, 100);
@@ -125,52 +118,42 @@ void drawGrenade(){
 
 void drawShurikenPart(){
 	glPushMatrix();
+	glTranslated(0, 0, 1.48);
 	glScaled(1, 0.4, 1);
-	glutSolidCone(0.5, 2.5, 4, 100);
+	glutSolidCone(0.5, 2.5, 4, 1);
 	glPushMatrix();
 	glRotated(180, 0, 1, 0);
-	glutSolidCone(0.5, 1, 4, 100);
+	glutSolidCone(0.5, 1, 4, 1);
 	glPopMatrix();
 	glPopMatrix();
 }
 
 void drawShuriken(){
+	glutSolidTorus(0.07, 0.43, 100, 100);
+	
+	glutSolidCone(0.38, 0.25, 4, 1);
+	
 	glPushMatrix();
-	glTranslated(0, -0.43, 0);
-	glutSolidTorus(0.02, 0.13, 100, 100);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslated(0, -0.43, 0);
-	glutSolidCone(0.11, 0.1, 4, 100);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslated(0, -0.43, 0);
 	glRotated(180, 0, 1, 0);
-	glutSolidCone(0.11, 0.1, 4, 100);
+	glutSolidCone(0.38, 0.25, 4, 1);
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslated(0, 0.7, 0);
 	glRotated(-90, 1, 0, 0);
 	drawShurikenPart();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslated(1, -1, 0);
 	glRotated(-120, 0, 0, 1);
 	glRotated(-90, 1, 0, 0);
 	drawShurikenPart();
 	glPopMatrix();
 
 	glPushMatrix();
-	glTranslated(-1, -1, 0);
 	glRotated(120, 0, 0, 1);
 	glRotated(-90, 1, 0, 0);
 	drawShurikenPart();
 	glPopMatrix();
-
 }
 
 void drawTarget(){
@@ -200,37 +183,45 @@ void drawTarget(){
 	glPopMatrix();
 }
 
-void drawRoom(){
-	//Downward Wall
+void drawWall(double thickness) {
 	glPushMatrix();
-	glTranslated(0, 0, -30);
+	glScaled(1.0, 0.1 * thickness, 1.0);
+	glutSolidCube(10);
+	glPopMatrix();
+}
+
+void drawRoom(){
+	//Front Wall
+	glPushMatrix();
+	glTranslated(0, 0, -60);
+	glScaled(10, 4, 1);
 	glRotated(-90, 1.0, 0.0, 0.0);
 	drawWall(0.02);
 	glPopMatrix();
-	//Front Wall
+	//Downward Wall
 	glPushMatrix();
-	glTranslated(0, -5, -25);
-	glScaled(1, 1, 7);
+	glTranslated(0, -20, -25);
+	glScaled(10, 4, 7);
+	drawWall(0.02);
+	glPopMatrix();
+	//Upper Wall
+	glPushMatrix();
+	glTranslated(0, 20, -25);
+	glScaled(10, 4, 7);
 	drawWall(0.02);
 	glPopMatrix();
 	//Right Wall
 	glPushMatrix();
-	glTranslated(5, 0, -25);
-	glScaled(1, 1, 7);
+	glTranslated(50, 0, -25);
+	glScaled(10, 4, 7);
 	glRotated(90, 0.0, 0.0, 1.0);
 	drawWall(0.02);
 	glPopMatrix();
 	//Left Wall
 	glPushMatrix();
-	glTranslated(-5, 0, -25);
-	glScaled(1, 1, 7);
+	glTranslated(-50, 0, -25);
+	glScaled(10, 4, 7);
 	glRotated(-90, 0.0, 0.0, 1.0);
-	drawWall(0.02);
-	glPopMatrix();
-	//Upper Wall
-	glPushMatrix();
-	glTranslated(0, 5, -25);
-	glScaled(1, 1, 7);
 	drawWall(0.02);
 	glPopMatrix();
 }
@@ -241,6 +232,7 @@ void Display(void) {
 
 	setupLights();
 	setupCamera();
+	
 	quadratic = gluNewQuadric();
 
 	glPushMatrix();
@@ -252,14 +244,14 @@ void Display(void) {
 	glPopMatrix();
 
 	glPushMatrix();
-	//drawShuriken();
+	drawShuriken();
 	glPopMatrix();
 
 	glPushMatrix();
 	//drawTarget();
 	glPopMatrix();
 
-	drawRoom();
+	//drawRoom();
 
 	glFlush();
 }
@@ -270,8 +262,8 @@ void Anim() {
 }
 
 void main(int argc, char** argv) {
+	
 	glutInit(&argc, argv);
-
 	glutInitWindowSize(screenX, screenY);
 	glutInitWindowPosition(0, 0);
 
@@ -295,7 +287,6 @@ void main(int argc, char** argv) {
 	glEnable(GL_NORMALIZE);
 	glEnable(GL_COLOR_MATERIAL);
 	glShadeModel(GL_SMOOTH);
-	
 	
 	glutMainLoop();
 	
