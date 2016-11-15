@@ -1,10 +1,29 @@
+#include <math.h>
 #include <glut.h>
+
+#define PI 3.14159265
+#define radToDeg  (180.0 / PI);
+#define degToRad  (PI / 180.0);
 
 double screenX = glutGet(GLUT_SCREEN_WIDTH);
 double screenY = glutGet(GLUT_SCREEN_HEIGHT);
-double eyeX = 0;
-double eyeY = 0;
+double eyeX;
+double eyeY;
 double eyeZ = 10;
+double shootingAngle;
+double bulletX;
+double bulletY;
+double bulletZ;
+double grenadeX;
+double grenadeY;
+double grenadeZ;
+double shurikenX;
+double shurikenY;
+double shurikenZ;
+double targetX;
+double targetY;
+double targetZ = -50;
+
 GLUquadricObj *quadratic;
 
 void setupLights() {
@@ -38,7 +57,7 @@ void setupCamera() {
 
 void passM(int x, int y)
 {
-	
+	shootingAngle = ((2 * x - screenX) / screenX) * 45;
 	glutPostRedisplay();
 }
 
@@ -167,7 +186,7 @@ void drawTarget(){
 	gluDisk(quadratic, 1, 2, 100, 100);
 	glColor3f(1.0, 0.0, 0.0);
 	gluDisk(quadratic, 0, 1, 100, 100);
-	gluCylinder(quadratic, 5, 5, 0.3, 100, 100);
+	gluCylinder(quadratic, 5, 5, 1, 100, 100);
 	glPushMatrix();
 	glTranslated(0, 0, 0.3);
 	glColor3f(1.0, 0.0, 0.0);
@@ -180,13 +199,16 @@ void drawTarget(){
 	gluDisk(quadratic, 1, 2, 100, 100);
 	glColor3f(1.0, 0.0, 0.0);
 	gluDisk(quadratic, 0, 1, 100, 100);
+	glColor3f(1.0, 1.0, 1.0);
 	glPopMatrix();
 }
 
 void drawWall(double thickness) {
 	glPushMatrix();
+	glColor3f(0.8, 1.0, 0.8);
 	glScaled(1.0, 0.1 * thickness, 1.0);
 	glutSolidCube(10);
+	glColor3f(1.0, 1.0, 1.0);
 	glPopMatrix();
 }
 
@@ -226,32 +248,55 @@ void drawRoom(){
 	glPopMatrix();
 }
 
+void drawaBulletPath(){
+	glColor3d(0.5, 0.5, 0.5);
+	double radAngle = shootingAngle * degToRad;
+	double slope = tan(radAngle);
+	double xPosition = 2*sin(radAngle);
+	for (double i = -2; i > targetZ; i--){
+		glPushMatrix();
+		xPosition += slope ;
+		glTranslated(xPosition, 0, i);
+		glutSolidSphere(0.1, 100, 100);
+		glPopMatrix();
+	}
+	glColor3d(1, 1, 1);
+}
+
 void Display(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	setupLights();
+	//setupLights();
 	setupCamera();
 	
-	quadratic = gluNewQuadric();
-
+	drawaBulletPath();
 	glPushMatrix();
-	//drawBullet();
+	glTranslated(bulletX, bulletY, bulletZ);
+	glScaled(0.6, 0.6, 0.5);
+	glRotated(-shootingAngle, 0, 1, 0);
+	glRotated(180, 0, 1, 0);
+	drawBullet();
 	glPopMatrix();
 
 	glPushMatrix();
+	glTranslated(grenadeX, grenadeY, grenadeZ);
+	glRotated(shootingAngle, 0, 1, 0);
 	//drawGrenade();
 	glPopMatrix();
 
 	glPushMatrix();
-	drawShuriken();
+	glTranslated(shurikenX, shurikenY, shurikenZ);
+	glRotated(shootingAngle, 0, 1, 0);
+	//drawShuriken();
 	glPopMatrix();
 
 	glPushMatrix();
-	//drawTarget();
+	glTranslated(targetX, targetY, targetZ);
+	drawTarget();
 	glPopMatrix();
 
-	//drawRoom();
+	drawRoom();
 
 	glFlush();
 }
@@ -268,6 +313,7 @@ void main(int argc, char** argv) {
 	glutInitWindowPosition(0, 0);
 
 	glutCreateWindow("Assignment 2");
+	quadratic = gluNewQuadric();
 	glutDisplayFunc(Display);
 	glutIdleFunc(Anim);
 
@@ -289,5 +335,4 @@ void main(int argc, char** argv) {
 	glShadeModel(GL_SMOOTH);
 	
 	glutMainLoop();
-	
 }
