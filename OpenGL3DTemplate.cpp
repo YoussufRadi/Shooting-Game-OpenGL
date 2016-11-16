@@ -1,4 +1,8 @@
 #include <math.h>
+#include <stdio.h>
+#include <windows.h>
+#include <string>
+#include <string.h>
 #include <glut.h>
 
 #define PI 3.14159265
@@ -7,23 +11,26 @@
 
 double screenX = glutGet(GLUT_SCREEN_WIDTH);
 double screenY = glutGet(GLUT_SCREEN_HEIGHT);
-double eyeX;
-double eyeY;
+double eyeX = 0;
+double eyeY = 0;
 double eyeZ = 10;
-double shootingAngle;
-double bulletX;
-double bulletY;
-double bulletZ;
-double grenadeX;
-double grenadeY;
-double grenadeZ;
-double shurikenX;
-double shurikenY;
-double shurikenZ;
-double targetX;
-double targetY;
-double targetZ = -50;
-
+double shootingAngle = 0;
+double bulletX = 0;
+double bulletY = 0;
+double bulletZ = 0;
+double grenadeX = 0;
+double grenadeY = 0;
+double grenadeZ = 0;
+double shurikenX = 0;
+double shurikenY = 0;
+double shurikenZ = 0;
+double targetX = 0;
+double targetY = 0;
+double targetZ = -55;
+int p0[2];
+int p1[2];
+int p2[2];
+int p3[2];
 GLUquadricObj *quadratic;
 
 void setupLights() {
@@ -97,6 +104,23 @@ void key(unsigned char k, int x, int y)
 	if (k == (char)27)
 		exit(0);
 	glutPostRedisplay();
+}
+
+void print(int x, int y, char *string)
+{
+	int len, i;
+	glRasterPos2f(x, y);
+	len = (int)strlen(string);
+	for (i = 0; i < len; i++)
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
+}
+
+int* bezier(float t, int* p0, int* p1, int* p2, int* p3)
+{
+	int res[2];
+	res[0] = pow((1 - t), 3)*p0[0] + 3 * t*pow((1 - t), 2)*p1[0] + 3 * pow(t, 2)*(1 - t)*p2[0] + pow(t, 3)*p3[0];
+	res[1] = pow((1 - t), 3)*p0[1] + 3 * t*pow((1 - t), 2)*p1[1] + 3 * pow(t, 2)*(1 - t)*p2[1] + pow(t, 3)*p3[1];
+	return res;
 }
 
 void drawBullet(){
@@ -252,12 +276,43 @@ void drawaBulletPath(){
 	glColor3d(0.5, 0.5, 0.5);
 	double radAngle = shootingAngle * degToRad;
 	double slope = tan(radAngle);
-	double xPosition = 2*sin(radAngle);
+	double xPosition = 2 * sin(radAngle);
 	for (double i = -2; i > targetZ; i--){
 		glPushMatrix();
-		xPosition += slope ;
+		xPosition += slope;
 		glTranslated(xPosition, 0, i);
 		glutSolidSphere(0.1, 100, 100);
+		glPopMatrix();
+	}
+	glColor3d(1, 1, 1);
+}
+
+void drawaGrenadePath(){
+	glColor3f(1, 0, 0);
+	p0[0] = 2;
+	p0[1] = 0;
+	p1[0] = 2;
+	p1[1] = 15;
+	p2[0] = 48;
+	p2[1] = 15;
+	p3[0] = 50;
+	p3[1] = 0;
+	printf((std::to_string(p0[0]) + "   p00   ").c_str());
+	printf((std::to_string(p0[1]) + "   p01   ").c_str());
+	printf((std::to_string(p1[0]) + "   p10   ").c_str());
+	printf((std::to_string(p1[1]) + "   p11   ").c_str());
+	printf((std::to_string(p2[0]) + "   p20   ").c_str());
+	printf((std::to_string(p2[1]) + "   p21   ").c_str());
+	printf((std::to_string(p3[0]) + "   p30   ").c_str());
+	printf((std::to_string(p3[1]) + "   p31   ").c_str());
+
+	for (float t = 0; t<1; t += 0.001)
+	{
+		int* p = bezier(t, p0, p1, p2, p3);
+		glPushMatrix();
+		glTranslated(0, p[1], p[0]);
+		printf((std::to_string(p[1]) + "      ").c_str());
+		glutSolidSphere(1, 100, 100);
 		glPopMatrix();
 	}
 	glColor3d(1, 1, 1);
@@ -270,17 +325,22 @@ void Display(void) {
 	//setupLights();
 	setupCamera();
 	
-	drawaBulletPath();
+	//drawaBulletPath();
+	
 	glPushMatrix();
 	glTranslated(bulletX, bulletY, bulletZ);
 	glScaled(0.6, 0.6, 0.5);
 	glRotated(-shootingAngle, 0, 1, 0);
 	glRotated(180, 0, 1, 0);
-	drawBullet();
+	//drawBullet();
 	glPopMatrix();
 
+	drawaGrenadePath();
+	
 	glPushMatrix();
 	glTranslated(grenadeX, grenadeY, grenadeZ);
+	glScaled(0.1, 0.1, 0.1);
+	glRotated(-45, 1, 0, 0);
 	glRotated(shootingAngle, 0, 1, 0);
 	//drawGrenade();
 	glPopMatrix();
@@ -293,17 +353,18 @@ void Display(void) {
 
 	glPushMatrix();
 	glTranslated(targetX, targetY, targetZ);
-	drawTarget();
+	glScaled(2, 2, 2);
+	//drawTarget();
 	glPopMatrix();
 
-	drawRoom();
+	//drawRoom();
 
 	glFlush();
 }
 
 void Anim() {
 
-	glutPostRedisplay();
+	//glutPostRedisplay();
 }
 
 void main(int argc, char** argv) {
