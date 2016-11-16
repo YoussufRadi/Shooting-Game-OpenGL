@@ -9,3 +9,4 @@ OpenGL3DTemplate.opensdf
 Debug/OpenGL3DTemplate.tlog/link.command.1.tlog
 *.tlog
 Debug/OpenGL3DTemplate.tlog/cl.command.1.tlog
+*.log
