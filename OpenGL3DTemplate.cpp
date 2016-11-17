@@ -1,7 +1,4 @@
 #include <math.h>
-#include <stdio.h>
-#include <windows.h>
-#include <string>
 #include <string.h>
 #include <glut.h>
 
@@ -14,9 +11,9 @@ GLUquadricObj *quadratic;
 double screenX = glutGet(GLUT_SCREEN_WIDTH);
 double screenY = glutGet(GLUT_SCREEN_HEIGHT);
 
-double eyeX = 0;
-double eyeY = 0;
-double eyeZ = 10;
+double eyeX = 2;
+double eyeY = 2;
+double eyeZ = 6;
 
 double cameraX = 0;
 
@@ -41,7 +38,7 @@ double targetX = 0;
 double targetY = 0;
 double targetZ = -55;
 
-double* p;
+double* p = new double[3];
 int p0[3];
 int p1[3];
 int p2[3];
@@ -52,11 +49,12 @@ bool hit = false;
 bool replay = false;
 bool done = false;
 float startFire = 0;
+bool passTarget = false;
 
 void startAgain(){
-	eyeX = 0;
-	eyeY = 0;
-	eyeZ = 10;
+	eyeX = 2;
+	eyeY = 2;
+	eyeZ = 6;
 	cameraX = -60;
 	shootingAngle = 0;
 	bulletX = 0;
@@ -79,6 +77,7 @@ void startAgain(){
 	replay = false;
 	done = false;
 	startFire = 0;
+	passTarget = false;
 }
 
 void replayScene(){
@@ -99,6 +98,7 @@ void replayScene(){
 	shurikenAngle = 0;
 	replay = true;
 	startFire = 0;
+	passTarget = false;
 }
 
 void setupLights() {
@@ -112,8 +112,8 @@ void setupLights() {
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
 	GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
-	GLfloat lightPosition[] = { 0.0f, 1.0f, 1.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	GLfloat lightPosition[] = { -7.0f, 6.0f, 3.0f, 0.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
 }
 
@@ -208,13 +208,11 @@ void print(int x, int y, char *string)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 }
 
-double* bezier(float t, int* p0, int* p1, int* p2, int* p3)
+void bezier(float t, int* p0, int* p1, int* p2, int* p3, double* p)
 {
-	double res[3];
-	res[0] = pow((1 - t), 3)*p0[0] + 3 * t*pow((1 - t), 2)*p1[0] + 3 * pow(t, 2)*(1 - t)*p2[0] + pow(t, 3)*p3[0];
-	res[1] = pow((1 - t), 3)*p0[1] + 3 * t*pow((1 - t), 2)*p1[1] + 3 * pow(t, 2)*(1 - t)*p2[1] + pow(t, 3)*p3[1];
-	res[2] = pow((1 - t), 3)*p0[2] + 3 * t*pow((1 - t), 2)*p1[2] + 3 * pow(t, 2)*(1 - t)*p2[2] + pow(t, 3)*p3[2];
-	return res;
+	p[0] = pow((1 - t), 3)*p0[0] + 3 * t*pow((1 - t), 2)*p1[0] + 3 * pow(t, 2)*(1 - t)*p2[0] + pow(t, 3)*p3[0];
+	p[1] = pow((1 - t), 3)*p0[1] + 3 * t*pow((1 - t), 2)*p1[1] + 3 * pow(t, 2)*(1 - t)*p2[1] + pow(t, 3)*p3[1];
+	p[2] = pow((1 - t), 3)*p0[2] + 3 * t*pow((1 - t), 2)*p1[2] + 3 * pow(t, 2)*(1 - t)*p2[2] + pow(t, 3)*p3[2];
 }
 
 void drawBullet(){
@@ -306,11 +304,11 @@ void drawTarget(){
 	gluDisk(quadratic, 0, 1, 100, 100);
 	gluCylinder(quadratic, 5, 5, 1, 100, 100);
 	glPushMatrix();
-	glTranslated(0, 0, 0.3);
+	glTranslated(0, 0, 1);
 	glColor3f(1.0, 0.0, 0.0);
 	gluDisk(quadratic, 4, 5, 100, 100);
 	glColor3f(1.0, 1.0, 1.0);
-	gluDisk(quadratic, 4, 5, 100, 100);
+	gluDisk(quadratic, 3, 4, 100, 100);
 	glColor3f(1.0, 0.0, 0.0);
 	gluDisk(quadratic, 2, 3, 100, 100);
 	glColor3f(1.0, 1.0, 1.0);
@@ -324,7 +322,7 @@ void drawTarget(){
 void drawWall(double thickness) {
 	glPushMatrix();
 	glColor3f(0.8, 1.0, 0.8);
-	glScaled(1.0, 0.1 * thickness, 1.0);
+	glScaled(1.0, 5 * thickness, 1.0);
 	glutSolidCube(10);
 	glColor3f(1.0, 1.0, 1.0);
 	glPopMatrix();
@@ -378,7 +376,7 @@ void drawBulletPath(){
 	double radAngle = shootingAngle * degToRad;
 	double slope = tan(radAngle);
 	double xPosition = 2 * sin(radAngle);
-	for (double i = bulletZ-2; i > targetZ; i--){
+	for (double i = bulletZ - 2; i > targetZ && !hit; i--){
 		glPushMatrix();
 		xPosition += slope;
 		glTranslated(xPosition, 0, i);
@@ -407,9 +405,9 @@ void drawGrenadePath(){
 	p3[1] = -30;
 	p3[2] = 60 * tan(radAngle);
 	
-	for (float t = 0; t<1; t += 0.02)
+	for (float t = 0; t<1 && !hit; t += 0.02)
 	{
-		p = bezier(t, p0, p1, p2, p3);
+		bezier(t, p0, p1, p2, p3, p);
 		glPushMatrix();
 		glTranslated(p[2], p[1], -p[0]);
 		glutSolidSphere(0.1, 100, 100);
@@ -433,9 +431,9 @@ void drawShurikenPath(){
 	p3[0] = 60;
 	p3[1] = 0 + 60 * tan(radAngle);
 
-	for (float t = 0; t<1; t += 0.02)
+	for (float t = 0; t<1 && !hit; t += 0.02)
 	{
-		p = bezier(t, p0, p1, p2, p3);
+		bezier(t, p0, p1, p2, p3, p);
 		glPushMatrix();
 		glTranslated(p[1], 0, -p[0]);
 		glutSolidSphere(0.1, 100, 100);
@@ -448,7 +446,7 @@ void Display(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//setupLights();
+	setupLights();
 	setupCamera();
 	
 	switch (weapone)
@@ -471,7 +469,7 @@ void Display(void) {
 		glScaled(0.1, 0.1, 0.1);
 		glRotated(-45, 1, 0, 0);
 		glRotated(shootingAngle, 0, 1, 0);
-		glRotated(grenadeAngle, 1, 0, 0);
+		glRotated(grenadeAngle, 1, 1, 0);
 		drawGrenade();
 		glPopMatrix();
 		break;
@@ -481,7 +479,7 @@ void Display(void) {
 		glTranslated(shurikenX, shurikenY, shurikenZ);
 		glRotated(shootingAngle, 0, 1, 0);
 		glRotated(90, 1, 0, 0);
-		glRotated(shootingAngle, 0, 1, 0);
+		glRotated(shurikenAngle, 0, 0, 1);
 		glScaled(0.2, 0.2, 0.2);
 		drawShuriken();
 		glPopMatrix();
@@ -490,7 +488,7 @@ void Display(void) {
 
 	glPushMatrix();
 	glTranslated(targetX, targetY, targetZ);
-	glScaled(2, 2, 2);
+	glScaled(2, 2, 0.5);
 	drawTarget();
 	glPopMatrix();
 
@@ -534,8 +532,8 @@ void Anim() {
 			p3[0] = 60;
 			p3[1] = 0 + 60 * tan(radAngle);
 		}
-		if (targetX - 10 < targetZ * tan(radAngle) && targetX + 10 > targetZ * tan(radAngle))
-			zStop = targetZ;
+		if ( !passTarget && (targetX + 10 > targetZ * -tan(radAngle) && targetX - 10 < targetZ * -tan(radAngle)))
+			zStop = targetZ+1;
 		else
 			zStop = -60;
 		switch (weapone)
@@ -545,50 +543,66 @@ void Anim() {
 				bulletX += 1 * slope;
 				bulletZ = startFire;
 				startFire -= 1;
-				bulletAngle = ++bulletAngle % 360;
+				bulletAngle += 40;
+				bulletAngle = bulletAngle % 360;
 			}
 			else
 				done = true;
 			if (replay)
 			{
-				eyeX = bulletX;
-				eyeY = bulletY;
-				eyeZ = 5 + bulletZ ;
+				eyeX = bulletX + 2;
+				eyeY = bulletY + 2;
+				eyeZ = 5 + bulletZ;
 			}
 			break;
 		case 1:
+			if (grenadeY > sqrt(10*10 - (targetX - grenadeX)*(targetX - grenadeX))){
+				passTarget = true;
+				zStop = -60;
+			}
+			else if (!passTarget)
+				zStop = targetZ ;
+			
 			if (grenadeZ > zStop + 1 && grenadeX < 49 && grenadeX > -49){
-				p = bezier(startFire, p0, p1, p2, p3);
+				bezier(startFire, p0, p1, p2, p3, p);
 				grenadeX = p[2];
 				grenadeY = p[1];
 				grenadeZ = -p[0];
 				startFire += 0.01;
-				grenadeAngle = ++grenadeAngle % 360;
+				grenadeAngle += 8;
+				grenadeAngle = grenadeAngle % 360;
 			}
 			else
 				done = true;
 			if (replay)
 			{
-				eyeX = grenadeX;
-				eyeY = grenadeY;
-				eyeZ = 5 + grenadeZ;
+				eyeX = grenadeX + 2;
+				eyeY = grenadeY-1;
+				eyeZ = 2 + grenadeZ;
 			}
 			break;
 		case 2:
+			if ( !passTarget && shurikenX < targetX + 10 && shurikenX > targetX -10)
+				zStop = targetZ;
+			else{
+				passTarget = true;
+				zStop = -60;
+			}
 			if (shurikenZ > zStop + 1 && shurikenX < 49 && shurikenX > -49){
-				p = bezier(startFire, p0, p1, p2, p3);
+				bezier(startFire, p0, p1, p2, p3, p);
 				shurikenX = p[1];
 				shurikenZ = -p[0];
 				startFire += 0.01;
-				shurikenAngle = ++shurikenAngle % 360;
+				shurikenAngle += 20;
+				shurikenAngle = shurikenAngle % 360;
 			}
 			else
 				done = true;
 			if (replay)
 			{
-				eyeX = shurikenX;
-				eyeY = shurikenY;
-				eyeZ = shurikenZ + 5;
+				eyeX = shurikenX + 2;
+				eyeY = shurikenY + 1;
+				eyeZ = shurikenZ + 2;
 			}
 			break;
 		}
@@ -608,8 +622,8 @@ void main(int argc, char** argv) {
 	glutDisplayFunc(Display);
 	glutIdleFunc(Anim);
 
-	//glutFullScreen();
-	//glutSetCursor(GLUT_CURSOR_NONE);
+	glutFullScreen();
+	glutSetCursor(GLUT_CURSOR_NONE);
 	glutPassiveMotionFunc(passM);
 	glutKeyboardFunc(key);
 	glutSpecialFunc(spe);	
