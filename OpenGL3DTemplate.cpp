@@ -109,17 +109,17 @@ void replayScene(){
 }
 
 void setupLights() {
-	GLfloat ambient[] = { 0.7f, 0.7f, 0.7, 1.0f };
-	GLfloat diffuse[] = { 0.6f, 0.6f, 0.6, 1.0f };
-	GLfloat specular[] = { 1.0f, 1.0f, 1.0, 1.0f };
-	GLfloat shininess[] = { 50 };
+	GLfloat ambient[] = { 0.5f, 0.5f, 0.5f, 1 };
+	GLfloat diffuse[] = { 0.6f, 0.6f, 0.6, 0.9f };
+	GLfloat specular[] = { 0.8f, 0.8f, 0.8f, 1 };
+	GLfloat shininess[] = { 60 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
-	GLfloat lightIntensity[] = { 0.7f, 0.7f, 1, 1.0f };
-	GLfloat lightPosition[] = { -7.0f, 6.0f, 3.0f, 0.0f };
+	GLfloat lightIntensity[] = { 1, 1, 1, 1.0f };
+	GLfloat lightPosition[] = { 7.0f, 6.0f, 3.0f, 0.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
 }
@@ -223,6 +223,7 @@ void bezier(float t, int* p0, int* p1, int* p2, int* p3, double* p)
 }
 
 void drawBullet(){
+	glColor3d(0.6, 0.4, 0.2);
 	glutSolidTorus(0.05, 0.29, 100, 100);
 	glutSolidTorus(0.05, 0.14, 100, 100);
 	gluCylinder(quadratic, 0.3, 0.3, 2.8, 100, 10);
@@ -243,10 +244,13 @@ void drawBullet(){
 	glTranslated(0, 0, 3.79);
 	glutSolidSphere(0.142, 100, 100);
 	glPopMatrix();
+	glColor3d(1, 1, 1);
 }
 
 void drawGrenade(){
+	glColor3d(0.1, 0.5, 0.2);
 	glutSolidSphere(4, 100, 100);
+	glColor3d(0.1, 0.2, 0.2);
 	glutSolidTorus(0.2, 4, 100, 100);
 	glPushMatrix();
 	glTranslated(0, 0, 2.5);
@@ -256,6 +260,7 @@ void drawGrenade(){
 	glTranslated(0, 0, 4.7);
 	gluDisk(quadratic, 0, 1.2, 100, 100);
 	glPopMatrix();
+	glColor3d(1, 1, 1);
 }
 
 void drawShurikenPart(){
@@ -265,20 +270,25 @@ void drawShurikenPart(){
 	glutSolidCone(0.5, 2.5, 4, 1);
 	glPushMatrix();
 	glRotated(180, 0, 1, 0);
+	glColor3d(0.5, 0.5, 0.5);
 	glutSolidCone(0.5, 1, 4, 1);
 	glPopMatrix();
 	glPopMatrix();
+	glColor3d(1, 1, 1);
 }
 
 void drawShuriken(){
+
 	glutSolidTorus(0.07, 0.43, 100, 100);
-	
+
+	glColor3d(0.1, 0.4, 0.1);
 	glutSolidCone(0.38, 0.25, 4, 1);
 	
 	glPushMatrix();
 	glRotated(180, 0, 1, 0);
 	glutSolidCone(0.38, 0.25, 4, 1);
 	glPopMatrix();
+	glColor3d(1, 1, 1);
 
 	glPushMatrix();
 	glRotated(-90, 1, 0, 0);
@@ -438,7 +448,7 @@ void drawShurikenPath(){
 	p3[0] = 60;
 	p3[1] = 0 + 60 * tan(radAngle);
 
-	for (float t = 0; t<1 && !hit; t += 0.02)
+	for (float t = 0.02; t<1 && !hit; t += 0.02)
 	{
 		bezier(t, p0, p1, p2, p3, p);
 		glPushMatrix();
@@ -546,7 +556,7 @@ void Anim() {
 		switch (weapone)
 		{
 		case 0:
-			if (bulletZ > zStop + 1 && bulletX < 48 && bulletX > -48){
+			if (bulletZ > zStop + 1 && bulletX < 43 && bulletX > -43){
 				bulletX += 1 * slope;
 				bulletZ = startFire;
 				startFire -= 1;
@@ -573,7 +583,7 @@ void Anim() {
 			else if (!passTarget)
 				zStop = targetZ ;
 			
-			if (grenadeZ > zStop + 1 && grenadeX < 48 && grenadeX > -48){
+			if (grenadeZ > zStop + 1 && grenadeX < 43 && grenadeX > -43){
 				bezier(startFire, p0, p1, p2, p3, p);
 				grenadeX = p[2];
 				grenadeY = p[1];
@@ -602,7 +612,7 @@ void Anim() {
 					passTarget = true;
 				zStop = -60;
 			}
-			if (shurikenZ > zStop + 1 && shurikenX < 48 && shurikenX > -48){
+			if (shurikenZ > zStop + 1 && shurikenX < 43 && shurikenX > -43){
 				bezier(startFire, p0, p1, p2, p3, p);
 				shurikenX = p[1];
 				shurikenZ = -p[0];
