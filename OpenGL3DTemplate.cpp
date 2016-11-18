@@ -16,6 +16,8 @@ double eyeY = 2;
 double eyeZ = 6;
 
 double cameraX = 0;
+double cameraY = 0;
+double cameraZ = -60;
 
 double shootingAngle = 0;
 
@@ -55,7 +57,9 @@ void startAgain(){
 	eyeX = 2;
 	eyeY = 2;
 	eyeZ = 6;
-	cameraX = -60;
+	cameraX = 0;
+	cameraY = 0;
+	cameraZ = -60;
 	shootingAngle = 0;
 	bulletX = 0;
 	bulletY = 0;
@@ -84,6 +88,9 @@ void replayScene(){
 	eyeX = 0;
 	eyeY = 0;
 	eyeZ = 10;
+	cameraX = 0;
+	cameraY = 0;
+	cameraZ = -60;
 	bulletX = 0;
 	bulletY = 0;
 	bulletZ = 0;
@@ -126,7 +133,7 @@ void setupCamera() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(eyeX, eyeY, eyeZ,   //eye
-			 cameraX, 0.0, -60,   //center
+			 cameraX, cameraY, cameraZ,   //center
 			  0.0, 1.0, 0.0);  //up
 }
 
@@ -293,15 +300,15 @@ void drawShuriken(){
 
 void drawTarget(){
 	glColor3f(1.0, 0.0, 0.0);
-	gluDisk(quadratic, 4, 5, 100, 100);
-	glColor3f(1.0, 1.0, 1.0);
-	gluDisk(quadratic, 3, 4, 100, 100);
-	glColor3f(1.0, 0.0, 0.0);
-	gluDisk(quadratic, 2, 3, 100, 100);
-	glColor3f(1.0, 1.0, 1.0);
-	gluDisk(quadratic, 1, 2, 100, 100);
-	glColor3f(1.0, 0.0, 0.0);
-	gluDisk(quadratic, 0, 1, 100, 100);
+	//gluDisk(quadratic, 4, 5, 100, 100);
+	//glColor3f(1.0, 1.0, 1.0);
+	//gluDisk(quadratic, 3, 4, 100, 100);
+	//glColor3f(1.0, 0.0, 0.0);
+	//gluDisk(quadratic, 2, 3, 100, 100);
+	//glColor3f(1.0, 1.0, 1.0);
+	//gluDisk(quadratic, 1, 2, 100, 100);
+	//glColor3f(1.0, 0.0, 0.0);
+	gluDisk(quadratic, 0, 5, 100, 100);
 	gluCylinder(quadratic, 5, 5, 1, 100, 100);
 	glPushMatrix();
 	glTranslated(0, 0, 1);
@@ -539,7 +546,7 @@ void Anim() {
 		switch (weapone)
 		{
 		case 0:
-			if (bulletZ > zStop + 1 && bulletX < 49 && bulletX > -49){
+			if (bulletZ > zStop + 1 && bulletX < 48 && bulletX > -48){
 				bulletX += 1 * slope;
 				bulletZ = startFire;
 				startFire -= 1;
@@ -553,6 +560,9 @@ void Anim() {
 				eyeX = bulletX + 2;
 				eyeY = bulletY + 2;
 				eyeZ = 5 + bulletZ;
+				cameraX = bulletX;
+				cameraY = bulletY;
+				cameraZ = bulletZ;
 			}
 			break;
 		case 1:
@@ -563,7 +573,7 @@ void Anim() {
 			else if (!passTarget)
 				zStop = targetZ ;
 			
-			if (grenadeZ > zStop + 1 && grenadeX < 49 && grenadeX > -49){
+			if (grenadeZ > zStop + 1 && grenadeX < 48 && grenadeX > -48){
 				bezier(startFire, p0, p1, p2, p3, p);
 				grenadeX = p[2];
 				grenadeY = p[1];
@@ -578,17 +588,21 @@ void Anim() {
 			{
 				eyeX = grenadeX + 2;
 				eyeY = grenadeY-1;
-				eyeZ = 2 + grenadeZ;
+				eyeZ = 5 + grenadeZ;
+				cameraX = grenadeX;
+				cameraY = grenadeY;
+				cameraZ = grenadeZ;
 			}
 			break;
 		case 2:
 			if ( !passTarget && shurikenX < targetX + 10 && shurikenX > targetX -10)
 				zStop = targetZ;
 			else{
-				passTarget = true;
+				if (shurikenZ == targetZ)
+					passTarget = true;
 				zStop = -60;
 			}
-			if (shurikenZ > zStop + 1 && shurikenX < 49 && shurikenX > -49){
+			if (shurikenZ > zStop + 1 && shurikenX < 48 && shurikenX > -48){
 				bezier(startFire, p0, p1, p2, p3, p);
 				shurikenX = p[1];
 				shurikenZ = -p[0];
@@ -603,6 +617,9 @@ void Anim() {
 				eyeX = shurikenX + 2;
 				eyeY = shurikenY + 1;
 				eyeZ = shurikenZ + 2;
+				cameraX = shurikenX;
+				cameraY = shurikenY;
+				cameraZ = shurikenZ;
 			}
 			break;
 		}
