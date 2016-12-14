@@ -119,8 +119,8 @@ void setupLights() {
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 
 	GLfloat lightIntensity[] = { 1, 1, 1, 1.0f };
-	GLfloat lightPosition[] = { 7.0f, 6.0f, 3.0f, 0.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, lightIntensity);
+	GLfloat lightPosition[] = { -7.0f, 16.0f, 18.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
 }
 
@@ -338,7 +338,7 @@ void drawTarget(){
 
 void drawWall(double thickness) {
 	glPushMatrix();
-	glColor3f(0.8, 1.0, 0.8);
+	glColor3f(0.5f, 0.4f, 0.0f);
 	glScaled(1.0, 5 * thickness, 1.0);
 	glutSolidCube(10);
 	glColor3f(1.0, 1.0, 1.0);
